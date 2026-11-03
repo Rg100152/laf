@@ -6,7 +6,301 @@
   <meta name="description" content="laf — a dynamic, secure-feeling login system built with HTML, CSS and JavaScript." />
   <title>laf — sign in</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23090d18'/%3E%3Cpath d='M22 18v24a6 6 0 0 0 6 6h14' fill='none' stroke='url(%23g)' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --bg: #06080f;
+      --bg-soft: #0b1020;
+      --surface: rgba(255, 255, 255, 0.055);
+      --surface-strong: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --text: #eef1fb;
+      --muted: #93a0bb;
+      --faint: #6b7793;
+      --accent: #7c5cff;
+      --accent-2: #22d3ee;
+      --accent-soft: rgba(124, 92, 255, 0.16);
+      --danger: #ff6b8b;
+      --danger-soft: rgba(255, 107, 139, 0.12);
+      --success: #34e0a1;
+      --warning: #ffc857;
+      --radius: 22px;
+      --radius-sm: 13px;
+      --shadow: 0 30px 80px -30px rgba(3, 5, 14, 0.9), 0 2px 0 rgba(255, 255, 255, 0.04) inset;
+      --font: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { min-height: 100%; color-scheme: dark; }
+
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; border: 0; background: none; }
+    a { color: inherit; text-decoration: none; }
+    .hidden { display: none !important; }
+
+    .aurora {
+      position: fixed; inset: 0; z-index: -1; overflow: hidden;
+      background:
+        radial-gradient(120% 80% at 50% -20%, rgba(124, 92, 255, 0.18), transparent 60%),
+        radial-gradient(100% 70% at 90% 110%, rgba(34, 211, 238, 0.12), transparent 60%),
+        var(--bg);
+    }
+
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55;
+      animation: drift 22s ease-in-out infinite alternate;
+    }
+    .blob-a { width: 46vw; height: 46vw; min-width: 340px; min-height: 340px; top: -12%; left: -6%; background: radial-gradient(circle at 30% 30%, rgba(124, 92, 255, 0.75), transparent 65%); }
+    .blob-b { width: 42vw; height: 42vw; min-width: 300px; min-height: 300px; bottom: -18%; right: -8%; background: radial-gradient(circle at 60% 40%, rgba(34, 211, 238, 0.55), transparent 68%); animation-delay: -7s; }
+    .blob-c { width: 30vw; height: 30vw; min-width: 240px; min-height: 240px; top: 40%; left: 45%; background: radial-gradient(circle at 50% 50%, rgba(255, 92, 168, 0.3), transparent 70%); animation-delay: -13s; }
+
+    .grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, #000 20%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, #000 20%, transparent 75%);
+    }
+
+    @keyframes drift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(4%, 6%, 0) scale(1.12); } }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 26px 0 10px;
+    }
+
+    .brand { display: inline-flex; align-items: center; gap: 8px; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.04em; }
+    .brand-mark { background: linear-gradient(100deg, #fff 15%, #b9b1ff 55%, #7ce7f7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .brand-dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(140deg, var(--accent), var(--accent-2)); box-shadow: 0 0 12px rgba(124, 92, 255, 0.9); margin-top: 8px; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px;
+      border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+      color: var(--muted); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.01em;
+      backdrop-filter: blur(12px);
+    }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse 2.4s ease-in-out infinite; }
+    .pill.soft { border-color: rgba(52, 224, 161, 0.25); color: #a9f4d8; background: rgba(52, 224, 161, 0.08); }
+    .pill.busy .pill-dot { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.82); } }
+
+    .stage {
+      width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 26px 0 60px;
+      min-height: calc(100vh - 100px); display: flex; align-items: center;
+    }
+
+    .view { width: 100%; animation: viewIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes viewIn { from { opacity: 0; transform: translateY(16px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .auth-view { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: clamp(32px, 6vw, 96px); align-items: center; }
+
+    .glass {
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028));
+      border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+      backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+    }
+
+    .auth-card { padding: clamp(26px, 3.2vw, 38px); position: relative; overflow: hidden; }
+    .auth-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent); }
+
+    .eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #a99bff; margin-bottom: 8px; }
+    .card-head h1 { font-size: clamp(1.6rem, 2.6vw, 2rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; }
+    .subtitle { color: var(--muted); font-size: 0.92rem; margin-top: 6px; }
+
+    .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; margin: 24px 0 20px; padding: 5px; background: rgba(6, 8, 15, 0.5); border: 1px solid var(--border); border-radius: 999px; }
+    .tab { position: relative; z-index: 1; padding: 9px 0; border-radius: 999px; font-size: 0.88rem; font-weight: 600; color: var(--muted); transition: color 0.25s ease; }
+    .tab.is-active { color: #fff; }
+    .glider { position: absolute; z-index: 0; top: 5px; left: 5px; width: calc(50% - 5px); height: calc(100% - 10px); border-radius: 999px; background: linear-gradient(120deg, rgba(124, 92, 255, 0.95), rgba(34, 211, 238, 0.75)); box-shadow: 0 8px 24px -8px rgba(124, 92, 255, 0.9); transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1); }
+    .tabs[data-active="signup"] .glider { transform: translateX(calc(100% + 0px)); }
+
+    .form { display: flex; flex-direction: column; gap: 16px; animation: formIn 0.4s ease both; }
+    @keyframes formIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field-label { font-size: 0.78rem; font-weight: 600; color: #c2cbe0; letter-spacing: 0.01em; }
+
+    .control { position: relative; display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); background: rgba(6, 8, 15, 0.45); transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; }
+    .control:focus-within { border-color: rgba(124, 92, 255, 0.75); background: rgba(10, 13, 26, 0.7); box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.14); }
+    .field.invalid .control { border-color: rgba(255, 107, 139, 0.7); box-shadow: 0 0 0 4px var(--danger-soft); }
+    .field.invalid .control:focus-within { border-color: var(--danger); }
+
+    .control-icon { flex: none; width: 18px; height: 18px; margin-left: 14px; color: var(--faint); transition: color 0.2s ease; }
+    .control:focus-within .control-icon { color: #a99bff; }
+    .control input { flex: 1; min-width: 0; padding: 12px 14px; border: 0; outline: 0; background: transparent; font-size: 0.92rem; letter-spacing: 0.01em; }
+    .control input::placeholder { color: #5c6782; }
+    .control input:-webkit-autofill, .control input:-webkit-autofill:hover, .control input:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--text); -webkit-box-shadow: 0 0 0 1000px #0d1122 inset; caret-color: var(--text); transition: background-color 9999s ease-out;
+    }
+
+    .peek { flex: none; display: grid; place-items: center; width: 40px; height: 40px; margin-right: 4px; border-radius: 9px; color: var(--faint); transition: color 0.2s ease, background 0.2s ease; }
+    .peek:hover { color: #dfe5f5; background: rgba(255, 255, 255, 0.06); }
+    .peek svg { width: 18px; height: 18px; }
+    .peek .eye-closed, .peek.is-on .eye-open { display: none; }
+    .peek.is-on .eye-closed { display: block; }
+
+    .field-error { min-height: 0; font-size: 0.76rem; color: var(--danger); display: none; }
+    .field-error.is-visible { display: block; animation: nudge 0.3s ease; }
+    @keyframes nudge { 0% { opacity: 0; transform: translateY(-3px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    .field.invalid .control { animation: shake 0.35s ease; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .check-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .check { position: relative; display: inline-flex; align-items: center; gap: 9px; font-size: 0.82rem; color: var(--muted); cursor: pointer; user-select: none; }
+    .check input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .check-box { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--border-strong); border-radius: 6px; background: rgba(6, 8, 15, 0.5); transition: all 0.2s ease; }
+    .check-box::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #0a0d1a; border-bottom: 2px solid #0a0d1a; transform: rotate(-45deg) scale(0.4); opacity: 0; margin-top: -2px; transition: all 0.2s ease; }
+    .check input:checked + .check-box { border-color: transparent; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .check input:checked + .check-box::after { opacity: 1; transform: rotate(-45deg) scale(1); }
+    .check input:focus-visible + .check-box { box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.25); }
+
+    .link { color: #a99bff; font-size: 0.82rem; font-weight: 600; transition: color 0.2s ease; }
+    .link:hover { color: #cdc5ff; text-decoration: underline; text-underline-offset: 3px; }
+    .link.inline { font-size: inherit; padding: 0; }
+
+    .switch-hint { text-align: center; font-size: 0.83rem; color: var(--faint); }
+    .switch-hint .link { font-size: 0.83rem; }
+
+    .btn-primary {
+      position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 13px 18px; border-radius: var(--radius-sm);
+      background: linear-gradient(120deg, #7c5cff, #5b8cff 45%, #22d3ee);
+      background-size: 160% 160%; color: #0a0d1a; font-weight: 700; font-size: 0.92rem;
+      letter-spacing: 0.01em; box-shadow: 0 16px 34px -14px rgba(92, 128, 255, 0.85);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background-position 0.4s ease, opacity 0.2s ease;
+      margin-top: 2px;
+    }
+    .btn-primary:hover:not(:disabled) { background-position: 100% 50%; transform: translateY(-1px); box-shadow: 0 22px 44px -14px rgba(92, 128, 255, 0.95); }
+    .btn-primary:active:not(:disabled) { transform: translateY(0) scale(0.995); }
+    .btn-primary:disabled { cursor: not-allowed; opacity: 0.75; }
+    .btn-primary.compact { width: auto; padding: 11px 20px; margin-top: 0; }
+
+    .spinner { display: none; width: 15px; height: 15px; border: 2px solid rgba(10, 13, 26, 0.35); border-top-color: #0a0d1a; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .btn-primary.is-loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .strength { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+    .strength span { height: 4px; border-radius: 99px; background: rgba(255, 255, 255, 0.08); transition: background 0.3s ease, box-shadow 0.3s ease; }
+    .strength[data-score="1"] span:nth-child(-n + 1) { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+    .strength[data-score="2"] span:nth-child(-n + 2) { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
+    .strength[data-score="3"] span:nth-child(-n + 3) { background: #7dd3fc; box-shadow: 0 0 10px #7dd3fc; }
+    .strength[data-score="4"] span:nth-child(-n + 4) { background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+    .strength-text { font-size: 0.74rem; color: var(--faint); margin-top: 2px; transition: color 0.2s ease; }
+    .strength-text[data-tone="weak"] { color: var(--danger); }
+    .strength-text[data-tone="fair"] { color: var(--warning); }
+    .strength-text[data-tone="good"] { color: #7dd3fc; }
+    .strength-text[data-tone="strong"] { color: var(--success); }
+
+    .disclaimer { margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.07); font-size: 0.71rem; color: var(--faint); text-align: center; }
+
+    .side-note { padding: 8px 0; max-width: 440px; animation: viewIn 0.7s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .side-note h2 { font-size: clamp(2rem, 3.6vw, 2.9rem); font-weight: 700; letter-spacing: -0.045em; line-height: 1.08; margin: 6px 0 26px; background: linear-gradient(120deg, #fff 30%, #b3aaff 70%, #7ce7f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 20px; }
+    .feature-list li { display: flex; gap: 14px; align-items: flex-start; }
+    .feature-icon { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; border: 1px solid var(--border); background: rgba(255, 255, 255, 0.05); color: #b7aaff; box-shadow: 0 10px 24px -14px rgba(124, 92, 255, 0.9); }
+    .feature-icon svg { width: 20px; height: 20px; }
+    .feature-list strong { display: block; font-size: 0.92rem; font-weight: 600; margin-bottom: 2px; }
+    .feature-list span:not(.feature-icon) { color: var(--muted); font-size: 0.85rem; }
+
+    .mini-stats { display: flex; gap: 34px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+    .mini-stats div { display: flex; flex-direction: column; }
+    .mini-stats strong { font-size: 1.5rem; letter-spacing: -0.03em; }
+    .mini-stats span { font-size: 0.76rem; color: var(--faint); }
+
+    .app-view { display: flex; justify-content: center; }
+    .dash { width: min(820px, 100%); padding: clamp(24px, 4vw, 40px); }
+    .dash-head { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+    .avatar {
+      flex: none; display: grid; place-items: center; width: 62px; height: 62px; border-radius: 20px;
+      background: linear-gradient(140deg, rgba(124, 92, 255, 0.9), rgba(34, 211, 238, 0.75));
+      color: #080b16; font-weight: 800; font-size: 1.2rem; letter-spacing: 0.02em;
+      box-shadow: 0 16px 34px -16px rgba(124, 92, 255, 0.9);
+    }
+
+    .dash-id { flex: 1; min-width: 200px; }
+    .dash-id .eyebrow { margin-bottom: 2px; }
+    .dash-id h1 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); letter-spacing: -0.035em; line-height: 1.2; overflow-wrap: anywhere; }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+
+    .btn-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 11px; background: rgba(255, 255, 255, 0.04); color: #cdd5e8; font-size: 0.83rem; font-weight: 600; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.09); border-color: var(--border-strong); transform: translateY(-1px); }
+    .btn-ghost svg { width: 16px; height: 16px; }
+    .btn-ghost.small { padding: 8px 13px; font-size: 0.78rem; }
+
+    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 26px 0; }
+    .stat { display: flex; flex-direction: column; gap: 4px; padding: 15px 17px; border: 1px solid var(--border); border-radius: 15px; background: rgba(255, 255, 255, 0.035); }
+    .stat span { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); font-weight: 600; }
+    .stat strong { font-size: 0.95rem; font-weight: 600; overflow-wrap: anywhere; }
+    .status-live { display: inline-flex; align-items: center; gap: 7px; color: #a9f4d8; }
+    .status-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+    .panel { border: 1px solid var(--border); border-radius: 17px; background: rgba(255, 255, 255, 0.03); padding: clamp(18px, 2.6vw, 24px); }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+    .panel-head h2 { font-size: 1.05rem; letter-spacing: -0.02em; margin-bottom: 2px; }
+
+    .profile-list { display: grid; gap: 2px; }
+    .profile-list div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 2px; border-top: 1px solid rgba(255, 255, 255, 0.055); flex-wrap: wrap; }
+    .profile-list div:first-child { border-top: 0; }
+    .profile-list dt { font-size: 0.8rem; color: var(--faint); }
+    .profile-list dd { font-size: 0.87rem; font-weight: 500; overflow-wrap: anywhere; text-align: right; }
+    .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 0.78rem !important; color: var(--muted); letter-spacing: 0.02em; }
+
+    .inline-form { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.07); animation: formIn 0.3s ease both; }
+    .inline-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+    .dash-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.07); font-size: 0.78rem; }
+
+    .toast-stack { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: flex; flex-direction: column; gap: 10px; max-width: min(360px, calc(100vw - 40px)); }
+    .toast { display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border: 1px solid var(--border-strong); border-radius: 14px; background: rgba(13, 17, 32, 0.92); box-shadow: 0 22px 48px -20px rgba(0, 0, 0, 0.9); backdrop-filter: blur(16px); font-size: 0.84rem; animation: toastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .toast.is-out { animation: toastOut 0.3s ease forwards; }
+    .toast-icon { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; font-weight: 800; }
+    .toast.success .toast-icon { background: rgba(52, 224, 161, 0.16); color: var(--success); }
+    .toast.error .toast-icon { background: var(--danger-soft); color: var(--danger); }
+    .toast.info .toast-icon { background: rgba(124, 92, 255, 0.18); color: #b7aaff; }
+    .toast p { margin-top: 1px; color: #dfe6f5; line-height: 1.4; }
+
+    @keyframes toastIn { from { opacity: 0; transform: translateX(24px) scale(0.97); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateX(24px) scale(0.97); } }
+
+    @media (max-width: 980px) {
+      .auth-view { grid-template-columns: minmax(0, 1fr); gap: 34px; max-width: 520px; margin: 0 auto; }
+      .side-note { display: none; }
+    }
+
+    @media (max-width: 620px) {
+      .topbar, .stage { width: calc(100% - 28px); }
+      .stage { padding: 12px 0 40px; align-items: flex-start; }
+      .auth-card { border-radius: 19px; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .dash-head { align-items: flex-start; }
+      .dash-head .btn-ghost { width: 100%; justify-content: center; }
+      .profile-list dd { text-align: left; width: 100%; }
+      .profile-list div { gap: 2px; }
+      .dash-foot { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="aurora" aria-hidden="true">
@@ -296,6 +590,707 @@
 
   <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
 
-  <script src="app.js"></script>
+  <script>
+    const STORAGE_KEYS = {
+      users: "laf.users.v1",
+      session: "laf.session.v1"
+    };
+
+    const LOCK_LIMIT = 5;
+    const LOCK_MS = 30000;
+    const REQUEST_DELAY = 650;
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const attempts = new Map();
+    const idleLabels = new WeakMap();
+
+    const state = {
+      mode: "login",
+      user: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function readUsers() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEYS.users);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function writeUsers(users) {
+      localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+    }
+
+    function randomHex(bytes = 16) {
+      const data = new Uint8Array(bytes);
+      if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(data);
+      } else {
+        for (let i = 0; i < bytes; i += 1) data[i] = Math.floor(Math.random() * 256);
+      }
+      return Array.from(data, (b) => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function digest(text) {
+      if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+        const buffer = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+        return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, "0")).join("");
+      }
+      let h1 = 0xdeadbeef;
+      let h2 = 0x41c6ce57;
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (h2 >>> 0).toString(16).padStart(8, "0") + (h1 >>> 0).toString(16).padStart(8, "0");
+    }
+
+    async function hashPassword(password, salt) {
+      return digest(`${salt}:${password}:laf`);
+    }
+
+    function normalizeEmail(value) {
+      return value.trim().toLowerCase();
+    }
+
+    function passwordScore(password) {
+      if (!password) return 0;
+      let score = 0;
+      if (password.length >= 8) score += 1;
+      if (password.length >= 12) score += 1;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+      if (/\d/.test(password)) score += 1;
+      if (/[^A-Za-z0-9]/.test(password)) score += 1;
+      return Math.min(4, score);
+    }
+
+    function scoreLabel(score) {
+      return ["", "Weak", "Fair", "Good", "Strong"][score] || "";
+    }
+
+    function scoreTone(score) {
+      return ["", "weak", "fair", "good", "strong"][score] || "";
+    }
+
+    function passwordProblem(password) {
+      if (!password) return "Please choose a password.";
+      if (password.length < 8) return "Password must be at least 8 characters.";
+      if (!/[A-Za-z]/.test(password)) return "Include at least one letter.";
+      if (!/\d/.test(password)) return "Include at least one number.";
+      return "";
+    }
+
+    function initialsOf(name, email) {
+      const source = (name || email || "laf").trim();
+      const parts = source.split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return source.slice(0, 2).toUpperCase();
+    }
+
+    function setFieldError(inputId, message) {
+      const input = $(inputId);
+      const error = document.querySelector(`[data-error-for="${inputId}"]`);
+      const field = input ? input.closest(".field") : null;
+      if (field) field.classList.toggle("invalid", Boolean(message));
+      if (input) input.setAttribute("aria-invalid", message ? "true" : "false");
+      if (error) {
+        error.textContent = message || "";
+        error.classList.toggle("is-visible", Boolean(message));
+      }
+    }
+
+    function clearFormErrors(form) {
+      form.querySelectorAll(".field").forEach((field) => field.classList.remove("invalid"));
+      form.querySelectorAll(".field-error").forEach((error) => {
+        error.textContent = "";
+        error.classList.remove("is-visible");
+      });
+      form.querySelectorAll("input").forEach((input) => input.removeAttribute("aria-invalid"));
+    }
+
+    function toast(type, message) {
+      const stack = $("toastStack");
+      const glyphs = { success: "OK", error: "!", info: "i" };
+      const node = document.createElement("div");
+      node.className = `toast ${type}`;
+      node.innerHTML = `<span class="toast-icon">${glyphs[type] || "i"}</span><p></p>`;
+      node.querySelector("p").textContent = message;
+      stack.appendChild(node);
+      setTimeout(() => {
+        node.classList.add("is-out");
+        setTimeout(() => node.remove(), 320);
+      }, 4200);
+    }
+
+    function setLoading(button, loading) {
+      const label = button.querySelector(".btn-label");
+      if (loading) {
+        idleLabels.set(button, label.textContent);
+        button.classList.add("is-loading");
+        button.disabled = true;
+      } else {
+        button.classList.remove("is-loading");
+        button.disabled = false;
+        const idle = idleLabels.get(button);
+        if (idle) label.textContent = idle;
+      }
+    }
+
+    function setStatus(active) {
+      const pill = $("statusPill");
+      pill.classList.toggle("soft", active);
+      pill.classList.toggle("busy", false);
+      $("statusText").textContent = active ? "Session active" : "Demo mode";
+    }
+
+    /* Sessions */
+
+    function getSession() {
+      const sources = [
+        { storage: localStorage, remembered: true },
+        { storage: sessionStorage, remembered: false }
+      ];
+      for (const source of sources) {
+        try {
+          const raw = source.storage.getItem(STORAGE_KEYS.session);
+          if (!raw) continue;
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.email) return { ...parsed, remembered: source.remembered };
+        } catch {
+          source.storage.removeItem(STORAGE_KEYS.session);
+        }
+      }
+      return null;
+    }
+
+    function createSession(email, remember) {
+      const payload = JSON.stringify({ email, at: new Date().toISOString() });
+      clearSession();
+      (remember ? localStorage : sessionStorage).setItem(STORAGE_KEYS.session, payload);
+    }
+
+    function clearSession() {
+      localStorage.removeItem(STORAGE_KEYS.session);
+      sessionStorage.removeItem(STORAGE_KEYS.session);
+    }
+
+    /* Views */
+
+    function showView(name) {
+      const auth = $("authView");
+      const app = $("appView");
+      const isApp = name === "app";
+      auth.classList.toggle("hidden", isApp);
+      app.classList.toggle("hidden", !isApp);
+      auth.style.animation = "none";
+      app.style.animation = "none";
+      void (isApp ? app : auth).offsetWidth;
+      auth.style.animation = "";
+      app.style.animation = "";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      const tabs = $("tabs");
+      const heading = {
+        login: ["Welcome back", "Sign in to laf", "Your space, your people, your pace."],
+        signup: ["Join laf", "Create your account", "Set up your space in under a minute."],
+        reset: ["Account recovery", "Reset your password", "Verify your email, then choose a new password."]
+      }[mode];
+
+      $("loginForm").classList.toggle("hidden", mode !== "login");
+      $("signupForm").classList.toggle("hidden", mode !== "signup");
+      $("resetForm").classList.toggle("hidden", mode !== "reset");
+      tabs.classList.toggle("hidden", mode === "reset");
+      tabs.dataset.active = mode === "signup" ? "signup" : "login";
+
+      $("loginTab").classList.toggle("is-active", mode === "login");
+      $("signupTab").classList.toggle("is-active", mode === "signup");
+      $("loginTab").setAttribute("aria-selected", mode === "login" ? "true" : "false");
+      $("signupTab").setAttribute("aria-selected", mode === "signup" ? "true" : "false");
+
+      $("cardEyebrow").textContent = heading[0];
+      $("cardTitle").textContent = heading[1];
+      $("cardSubtitle").textContent = heading[2];
+
+      document.title = mode === "signup" ? "laf — create account" : mode === "reset" ? "laf — reset password" : "laf — sign in";
+
+      if (mode === "reset") {
+        const email = $("loginEmail").value.trim();
+        if (email) $("resetEmail").value = email;
+      }
+
+      const focusTarget = { login: "loginEmail", signup: "signupName", reset: "resetEmail" }[mode];
+      setTimeout(() => {
+        const input = $(focusTarget);
+        if (input && !input.value) input.focus({ preventScroll: true });
+      }, 220);
+    }
+
+    function enterApp(user) {
+      state.user = user;
+      const firstName = (user.name || user.email).split(/\s+/)[0];
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+      const session = getSession();
+
+      $("greeting").textContent = `${greeting}, ${firstName}`;
+      $("dashName").textContent = user.name || "laf member";
+      $("dashEmail").textContent = user.email;
+      $("avatar").textContent = initialsOf(user.name, user.email);
+      $("profName").textContent = user.name || "—";
+      $("profEmail").textContent = user.email;
+      $("profId").textContent = `LAF-${user.id.slice(0, 8).toUpperCase()}`;
+      $("dashSince").textContent = new Date(user.createdAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+      $("dashSession").textContent = session && session.remembered ? "Remembered" : "This browser";
+      $("dashFootNote").textContent = session && session.remembered
+        ? "You chose to stay signed in on this device."
+        : "This session ends when you close the tab.";
+
+      $("editForm").classList.add("hidden");
+      $("profileList").classList.remove("hidden");
+      $("editBtn").classList.remove("hidden");
+      setStatus(true);
+      showView("app");
+      document.title = "laf — dashboard";
+    }
+
+    function leaveApp(message) {
+      state.user = null;
+      clearSession();
+      $("loginForm").reset();
+      $("signupForm").reset();
+      $("resetForm").reset();
+      clearFormErrors($("loginForm"));
+      clearFormErrors($("signupForm"));
+      clearFormErrors($("resetForm"));
+      updateStrength("");
+      setMode("login");
+      setStatus(false);
+      showView("auth");
+      if (message) toast("info", message);
+    }
+
+    function refreshUserCount() {
+      const count = Object.keys(readUsers()).length;
+      $("userCount").textContent = String(count);
+    }
+
+    /* Password visibility */
+
+    document.querySelectorAll("[data-peek]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const input = $(button.dataset.peek);
+        if (!input) return;
+        const reveal = input.type === "password";
+        input.type = reveal ? "text" : "password";
+        button.classList.toggle("is-on", reveal);
+        button.setAttribute("aria-pressed", reveal ? "true" : "false");
+        button.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+        input.focus({ preventScroll: true });
+      });
+    });
+
+    /* Password strength */
+
+    function updateStrength(password) {
+      const score = passwordScore(password);
+      const meter = $("strength");
+      const text = $("strengthText");
+      meter.dataset.score = String(score);
+      text.dataset.tone = scoreTone(score);
+      if (!password) {
+        text.textContent = "Use 8+ characters with letters and numbers.";
+      } else if (password.length < 8) {
+        text.textContent = `${scoreLabel(score) || "Too short"} — at least 8 characters needed.`;
+      } else {
+        text.textContent = `${scoreLabel(score)} password${score < 3 ? " — add length, numbers or symbols." : "."}`;
+      }
+    }
+
+    $("signupPassword").addEventListener("input", (event) => {
+      updateStrength(event.target.value);
+      setFieldError("signupPassword", "");
+    });
+
+    /* Validation wiring */
+
+    const blurValidators = {
+      loginEmail: (value) => (!value.trim() ? "Email is required." : !emailPattern.test(value.trim()) ? "Enter a valid email address." : ""),
+      loginPassword: (value) => (!value ? "Password is required." : ""),
+      signupName: (value) => (value.trim().length < 2 ? "Please enter your full name." : ""),
+      signupEmail: (value) => (!value.trim() ? "Email is required." : !emailPattern.test(value.trim()) ? "Enter a valid email address." : ""),
+      signupPassword: (value) => passwordProblem(value),
+      signupConfirm: (value) => (!value ? "Please confirm your password." : value !== $("signupPassword").value ? "Passwords do not match." : ""),
+      resetEmail: (value) => (!value.trim() ? "Email is required." : !emailPattern.test(value.trim()) ? "Enter a valid email address." : ""),
+      resetPassword: (value) => passwordProblem(value),
+      resetConfirm: (value) => (!value ? "Please confirm your new password." : value !== $("resetPassword").value ? "Passwords do not match." : ""),
+      editName: (value) => (value.trim().length < 2 ? "Name must be at least 2 characters." : "")
+    };
+
+    Object.entries(blurValidators).forEach(([id, validate]) => {
+      const input = $(id);
+      if (!input) return;
+      input.addEventListener("blur", () => {
+        if (!input.value && id !== "signupName") return;
+        setFieldError(id, validate(input.value));
+      });
+      input.addEventListener("input", () => {
+        if (input.closest(".field") && input.closest(".field").classList.contains("invalid")) {
+          setFieldError(id, validate(input.value));
+        }
+        if (id === "signupPassword" && $("signupConfirm").value) {
+          setFieldError("signupConfirm", blurValidators.signupConfirm($("signupConfirm").value));
+        }
+      });
+    });
+
+    $("terms").addEventListener("change", () => {
+      if ($("terms").checked) setFieldError("terms", "");
+    });
+
+    /* Mode switching */
+
+    document.querySelectorAll("[data-mode]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = button.closest("form");
+        if (form) clearFormErrors(form);
+        setMode(button.dataset.mode);
+      });
+    });
+
+    $("forgotBtn").addEventListener("click", () => {
+      setMode("reset");
+    });
+
+    $("backToLogin").addEventListener("click", () => {
+      clearFormErrors($("resetForm"));
+      setMode("login");
+    });
+
+    $("brandLink").addEventListener("click", (event) => {
+      event.preventDefault();
+      if (state.user) showView("app");
+      else setMode("login");
+    });
+
+    /* Lockout */
+
+    function lockState(email) {
+      const entry = attempts.get(email);
+      if (!entry) return 0;
+      return Math.max(0, entry.until - Date.now());
+    }
+
+    function registerFailure(email) {
+      const entry = attempts.get(email) || { count: 0, until: 0 };
+      entry.count += 1;
+      let locked = false;
+      if (entry.count >= LOCK_LIMIT) {
+        entry.count = 0;
+        entry.until = Date.now() + LOCK_MS;
+        locked = true;
+      }
+      attempts.set(email, entry);
+      return { locked, remaining: locked ? 0 : LOCK_LIMIT - entry.count };
+    }
+
+    function startCooldown(button) {
+      const label = button.querySelector(".btn-label");
+      const idle = label.textContent;
+      const end = Date.now() + LOCK_MS;
+      button.disabled = true;
+      const timer = setInterval(() => {
+        const left = Math.ceil((end - Date.now()) / 1000);
+        if (left <= 0) {
+          clearInterval(timer);
+          button.disabled = false;
+          label.textContent = idle;
+          return;
+        }
+        label.textContent = `Try again in ${left}s`;
+      }, 250);
+    }
+
+    /* Login */
+
+    $("loginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const emailInput = $("loginEmail");
+      const passwordInput = $("loginPassword");
+      const email = normalizeEmail(emailInput.value);
+      const password = passwordInput.value;
+      const emailProblem = blurValidators.loginEmail(emailInput.value);
+      const passwordProblemText = blurValidators.loginPassword(password);
+
+      setFieldError("loginEmail", emailProblem);
+      setFieldError("loginPassword", passwordProblemText);
+      if (emailProblem || passwordProblemText) {
+        (emailProblem ? emailInput : passwordInput).focus();
+        return;
+      }
+
+      const remaining = lockState(email);
+      if (remaining > 0) {
+        startCooldown($("loginSubmit"));
+        toast("error", "Too many attempts. Please wait before trying again.");
+        return;
+      }
+
+      const button = $("loginSubmit");
+      setLoading(button, true);
+      await sleep(REQUEST_DELAY);
+
+      const users = readUsers();
+      const user = users[email];
+
+      if (!user) {
+        registerFailure(email);
+        setLoading(button, false);
+        setFieldError("loginEmail", "No laf account found with this email.");
+        toast("error", "We couldn't find that account.");
+        return;
+      }
+
+      const hash = await hashPassword(password, user.salt);
+      if (hash !== user.hash) {
+        const result = registerFailure(email);
+        setLoading(button, false);
+        if (result.locked) {
+          setFieldError("loginPassword", "Too many failed attempts. Try again in 30 seconds.");
+          startCooldown(button);
+          toast("error", "Account temporarily paused for 30 seconds.");
+        } else {
+          setFieldError("loginPassword", `Incorrect password. ${result.remaining} ${result.remaining === 1 ? "attempt" : "attempts"} left.`);
+          toast("error", "Incorrect password.");
+        }
+        return;
+      }
+
+      attempts.delete(email);
+      const remember = $("rememberMe").checked;
+      createSession(email, remember);
+      $("loginForm").reset();
+      clearFormErrors($("loginForm"));
+      setLoading(button, false);
+      enterApp(user);
+      toast("success", `Welcome back, ${(user.name || email).split(/\s+/)[0]}.`);
+    });
+
+    /* Sign up */
+
+    $("signupForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const nameInput = $("signupName");
+      const emailInput = $("signupEmail");
+      const passwordInput = $("signupPassword");
+      const confirmInput = $("signupConfirm");
+      const name = nameInput.value.trim();
+      const email = normalizeEmail(emailInput.value);
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+      const terms = $("terms").checked;
+
+      const problems = {
+        signupName: blurValidators.signupName(name),
+        signupEmail: blurValidators.signupEmail(emailInput.value),
+        signupPassword: passwordProblem(password),
+        signupConfirm: blurValidators.signupConfirm(confirm)
+      };
+
+      Object.entries(problems).forEach(([id, message]) => setFieldError(id, message));
+      setFieldError("terms", terms ? "" : "Please accept the terms to continue.");
+      const firstProblem = Object.entries(problems).find(([, message]) => message);
+      if (firstProblem || !terms) {
+        if (firstProblem) $(firstProblem[0]).focus();
+        return;
+      }
+
+      const button = $("signupSubmit");
+      setLoading(button, true);
+      await sleep(REQUEST_DELAY);
+
+      const users = readUsers();
+      if (users[email]) {
+        setLoading(button, false);
+        setFieldError("signupEmail", "An account already exists with this email.");
+        toast("error", "That email is already registered.");
+        return;
+      }
+
+      const salt = randomHex(16);
+      const hash = await hashPassword(password, salt);
+      const user = {
+        id: randomHex(10),
+        name,
+        email,
+        salt,
+        hash,
+        createdAt: new Date().toISOString()
+      };
+
+      users[email] = user;
+      writeUsers(users);
+      refreshUserCount();
+      createSession(email, true);
+      $("signupForm").reset();
+      clearFormErrors($("signupForm"));
+      updateStrength("");
+      setLoading(button, false);
+      enterApp(user);
+      toast("success", "Account created. Welcome to laf.");
+    });
+
+    /* Reset password */
+
+    $("resetForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const emailInput = $("resetEmail");
+      const passwordInput = $("resetPassword");
+      const confirmInput = $("resetConfirm");
+      const email = normalizeEmail(emailInput.value);
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+
+      const problems = {
+        resetEmail: blurValidators.resetEmail(emailInput.value),
+        resetPassword: passwordProblem(password),
+        resetConfirm: blurValidators.resetConfirm(confirm)
+      };
+      Object.entries(problems).forEach(([id, message]) => setFieldError(id, message));
+      const firstProblem = Object.entries(problems).find(([, message]) => message);
+      if (firstProblem) {
+        $(firstProblem[0]).focus();
+        return;
+      }
+
+      const button = $("resetSubmit");
+      setLoading(button, true);
+      await sleep(REQUEST_DELAY);
+
+      const users = readUsers();
+      const user = users[email];
+      if (!user) {
+        setLoading(button, false);
+        setFieldError("resetEmail", "No laf account found with this email.");
+        toast("error", "We couldn't find that account.");
+        return;
+      }
+
+      user.salt = randomHex(16);
+      user.hash = await hashPassword(password, user.salt);
+      users[email] = user;
+      writeUsers(users);
+      attempts.delete(email);
+
+      $("loginEmail").value = email;
+      $("loginPassword").value = "";
+      $("loginPassword").focus();
+      $("resetForm").reset();
+      clearFormErrors($("resetForm"));
+      setMode("login");
+      setLoading(button, false);
+      toast("success", "Password updated. Sign in with your new password.");
+    });
+
+    /* Dashboard */
+
+    $("editBtn").addEventListener("click", () => {
+      $("editName").value = state.user ? state.user.name : "";
+      $("profileList").classList.add("hidden");
+      $("editBtn").classList.add("hidden");
+      $("editForm").classList.remove("hidden");
+      setTimeout(() => $("editName").focus({ preventScroll: true }), 60);
+    });
+
+    $("cancelEdit").addEventListener("click", () => {
+      clearFormErrors($("editForm"));
+      $("editForm").classList.add("hidden");
+      $("profileList").classList.remove("hidden");
+      $("editBtn").classList.remove("hidden");
+    });
+
+    $("editForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const nameInput = $("editName");
+      const name = nameInput.value.trim();
+      const problem = blurValidators.editName(name);
+      setFieldError("editName", problem);
+      if (problem) {
+        nameInput.focus();
+        return;
+      }
+      if (!state.user) return;
+
+      const button = event.submitter;
+      if (button) setLoading(button, true);
+      await sleep(320);
+
+      const users = readUsers();
+      const user = users[state.user.email];
+      if (!user) {
+        if (button) setLoading(button, false);
+        leaveApp("Your account could not be found. Please sign in again.");
+        return;
+      }
+
+      user.name = name;
+      users[user.email] = user;
+      writeUsers(users);
+
+      state.user = user;
+      const firstName = name.split(/\s+/)[0];
+      const hour = new Date().getHours();
+      $("greeting").textContent = `${hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"}, ${firstName}`;
+      $("dashName").textContent = name;
+      $("profName").textContent = name;
+      $("avatar").textContent = initialsOf(name, user.email);
+
+      if (button) setLoading(button, false);
+      $("editForm").classList.add("hidden");
+      $("profileList").classList.remove("hidden");
+      $("editBtn").classList.remove("hidden");
+      toast("success", "Profile updated.");
+    });
+
+    $("logoutBtn").addEventListener("click", () => {
+      leaveApp("You have been signed out.");
+    });
+
+    $("termsLink").addEventListener("click", () => {
+      toast("info", "Terms: laf is a client-side demo. Credentials stay on this device.");
+    });
+
+    /* Boot */
+
+    (function init() {
+      refreshUserCount();
+      const session = getSession();
+      if (session) {
+        const users = readUsers();
+        const user = users[session.email];
+        if (user) {
+          enterApp(user);
+          return;
+        }
+        clearSession();
+      }
+      setMode("login");
+      $("loginEmail").focus({ preventScroll: true });
+    })();
+  </script>
 </body>
 </html>
